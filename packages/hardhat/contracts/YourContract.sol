@@ -11,7 +11,7 @@ import "./Base64.sol";
 contract YourContract is Ownable, ERC721URIStorage
  {
     using Counters for Counters.Counter;
-    Counters.Counter private _ticketId;
+    Counters.Counter private ticketId;
 
     string firstSvg =
         unicode"<svg xmlns='http://www.w3.org/2000/svg' width='400' height='600'><rect width='400' height='600' style='fill:rgb(6, 10, 31);stroke-width:3' /><text x='25' y='75' font-family='Verdana' font-size='60'>🌙</text><text x='90' y='165' font-family='Verdana' font-size='45' fill='rgb(250, 204, 21)'>NIGHTS &amp;</text><text x='80' y='200' font-family='Verdana' font-size='45' fill='rgb(250, 204, 21)'>WEEKENDS</text><text x='120' y='390' font-family='Verdana' font-size='140'>🦄</text><text x='120' y='455' font-family='Verdana' font-size='30' fill='rgb(250, 204, 21)'>SEASON 01</text><rect x='0' y='475' width='400' height='200' fill='rgb(91, 51, 92)'></rect><text x='80' y='550' font-family='Verdana' font-size='50' fill='white'>";
@@ -32,15 +32,35 @@ contract YourContract is Ownable, ERC721URIStorage
     mapping(address => bool) public checkIns;
 
     constructor() ERC721("Test 05", "T05") {
-        _ticketId.increment();
+        ticketId.increment();
     }
 
+    function checkIn(address addy) public {
+        checkIns[addy] = true;
+        uint256 checkedInTicketId = ticketHolderIds[addy][0];
+
+        string memory metaData = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '{"name": "Nights & Weekends Season 1", "description": "500 builders shipping for 6 weeks. GTFOL or GTFO", "image": "ipfs://QmbeECCAZnZdkdF2yVu23DQHsu4uc3WSnsMS1gnwP4j8L3", "attributes": [{"trait_type": "Check In", "value": "true"}]}'
+                    )
+                )
+            )
+        );
+        string memory tokenURI = string(
+            abi.encodePacked("data:application/json;base64,", metaData)
+        );
+        console.log('tokenURI in checkIn: ', tokenURI);
+
+        _setTokenURI(checkedInTicketId, tokenURI);
+    }
 
     function mint() public payable {
         require(availableTickets > 0, "Sold out");
         require(saleIsActive, "Tickets are not on sale");
         require(msg.value >= ticketPrice, "You need to pay");
-        uint256 currentTicketId = _ticketId.current();
+        uint256 currentTicketId = ticketId.current();
         string memory stringTicketId = Strings.toString(currentTicketId);
 
         if (currentTicketId < 10) {
@@ -61,7 +81,7 @@ contract YourContract is Ownable, ERC721URIStorage
                     abi.encodePacked(
                         '{"name": "Nights & Weekends Season 1", "description": "500 builders shipping for 6 weeks. GTFOL or GTFO", "image": "data:image/svg+xml;base64,',
                         Base64.encode(bytes(finalSvg)),
-                        '"}'
+                        '", "attributes": [{"trait_type": "Check In", "value": "false"}]}'
                     )
                 )
             )
@@ -71,11 +91,13 @@ contract YourContract is Ownable, ERC721URIStorage
             abi.encodePacked("data:application/json;base64,", metaData)
         );
 
-        _safeMint(msg.sender, _ticketId.current());
-        _setTokenURI(_ticketId.current(), tokenURI);
+        _safeMint(msg.sender, ticketId.current());
+        _setTokenURI(ticketId.current(), tokenURI);
 
-        ticketHolderIds[msg.sender].push(_ticketId.current());
-        _ticketId.increment();
+        console.log('tokenURI in mint: ', tokenURI);
+
+        ticketHolderIds[msg.sender].push(ticketId.current());
+        ticketId.increment();
         availableTickets = availableTickets - 1;
     }
 
@@ -88,7 +110,7 @@ contract YourContract is Ownable, ERC721URIStorage
     }
 
     function getCurrentId() public view returns (uint256) {
-        return _ticketId.current();
+        return ticketId.current();
     }
 
     function openSale() public onlyOwner {
