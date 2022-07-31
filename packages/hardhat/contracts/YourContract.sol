@@ -74,15 +74,16 @@ contract YourContract is Ownable, ERC721URIStorage
         _safeMint(msg.sender, _ticketId.current());
         _setTokenURI(_ticketId.current(), tokenURI);
 
+        ticketHolderIds[msg.sender].push(_ticketId.current());
         _ticketId.increment();
         availableTickets = availableTickets - 1;
     }
 
-    function availableTicketCount() public view returns (uint256) {
+    function getAvailableTickets() public view returns (uint256) {
         return availableTickets;
     }
 
-    function totalTicketCount() public view returns (uint256) {
+    function getTotalTickets() public view returns (uint256) {
         return totalTickets;
     }
 
@@ -102,7 +103,9 @@ contract YourContract is Ownable, ERC721URIStorage
         return saleIsActive;
     }
 
-    function confirmOwnership(address addy) public view returns (bool) {
+    function getConfirmOwnership(address addy) public view returns (bool) {
+        // should check if ticketHolderIds[addy] is the owner of the specific ticketId
         return ticketHolderIds[addy].length > 0;
     }
+
 }
