@@ -21,7 +21,7 @@ contract YourContract is Ownable, ERC721URIStorage
 
     string zeros = "";
 
-    bool public saleIsActive = false;
+    bool public saleIsActive = true;
     uint256 public totalTickets = 500;
     uint256 public availableTickets = 500;
     // 11 0s = .0000001 eth
@@ -35,39 +35,11 @@ contract YourContract is Ownable, ERC721URIStorage
         _ticketId.increment();
     }
 
-    function checkIn(address addy) public {
-        checkIns[addy] = true;
-        uint256 ticketId = ticketHolderIds[addy][0];
-
-        // user checksIn
-        // changes metadata
-        // send them an email? or link to
-
-        string memory metaData = Base64.encode(
-            bytes(
-                string(
-                    abi.encodePacked(
-                        '{"name": "Nights & Weekends Season 1", "description": "500 builders shipping for 6 weeks. GTFOL or GTFO", "image": "ipfs://QmV3XjfDWAQ7PjJdWvmHiL5eGUtLfsyNLQSY52j6BmbLBL", "attributes": [{ "trait_type": "Checked In", "value": "true" }]}'
-                    )
-                )
-            )
-        );
-
-        string memory tokenURI = string(
-            abi.encodePacked("data:application/json;base64,", metaData)
-        );
-
-        console.log("in checkIn");
-        console.log("ticketId: ", ticketId);
-        console.log("tokenURI: ", tokenURI);
-
-        _setTokenURI(ticketId, tokenURI);
-    }
 
     function mint() public payable {
         require(availableTickets > 0, "Sold out");
-        require(msg.value >= ticketPrice, "Pay more money");
         require(saleIsActive, "Tickets are not on sale");
+        require(msg.value >= ticketPrice, "You need to pay");
         uint256 currentTicketId = _ticketId.current();
         string memory stringTicketId = Strings.toString(currentTicketId);
 
@@ -100,12 +72,7 @@ contract YourContract is Ownable, ERC721URIStorage
         );
 
         _safeMint(msg.sender, _ticketId.current());
-        ticketHolderIds[msg.sender].push(_ticketId.current());
         _setTokenURI(_ticketId.current(), tokenURI);
-
-        console.log("in mint");
-        console.log("_ticketId.current(): ", _ticketId.current());
-        console.log("tokenURI: ", tokenURI);
 
         _ticketId.increment();
         availableTickets = availableTickets - 1;
@@ -131,16 +98,11 @@ contract YourContract is Ownable, ERC721URIStorage
         saleIsActive = false;
     }
 
-    function isSaleOpen() public view returns (bool) {
-        console.log("saleIsActive: ", saleIsActive);
+    function getSaleOpen() public view returns (bool) {
         return saleIsActive;
     }
 
     function confirmOwnership(address addy) public view returns (bool) {
-        console.log(
-            "ticketHolderIds[addy].length: ",
-            ticketHolderIds[addy].length
-        );
         return ticketHolderIds[addy].length > 0;
     }
 }
