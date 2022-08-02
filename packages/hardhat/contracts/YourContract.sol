@@ -31,7 +31,7 @@ contract YourContract is Ownable, ERC721URIStorage
     mapping(address => uint256[]) public ticketHolderIds;
     mapping(address => bool) public checkIns;
 
-    constructor() ERC721("Test 05", "T05") {
+    constructor() ERC721("Test 06", "T06") {
         ticketId.increment();
     }
 
