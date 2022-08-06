@@ -128,12 +128,8 @@ module.exports = {
       },
     },
     polygon: {
-      url: "https://polygon-rpc.com",
-      // url: "https://speedy-nodes-nyc.moralis.io/XXXXXXXXXXXXXXXXXXXx/polygon/mainnet", // <---- YOUR MORALIS ID! (not limited to infura)
-      gasPrice: 3200000000,
-      accounts: {
-        mnemonic: mnemonic(),
-      },
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.POLYGON_MAINNET_ALCHEMY}`,
+      accounts: [process.env.VAN_MER__ETH_KEY],
     },
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
