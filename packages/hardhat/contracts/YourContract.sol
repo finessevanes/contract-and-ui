@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Base64.sol";
 
-contract YourContract is Ownable, ERC721URIStorage {
+contract NightsAndWeekendsDemo is Ownable, ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private ticketId;
 
@@ -27,16 +27,14 @@ contract YourContract is Ownable, ERC721URIStorage {
     string zeros = "";
 
     bool public saleIsActive = true;
-    uint256 public totalTickets = 500;
-    uint256 public availableTickets = 500;
-    // 11 0s = .0000001 eth
-    // uint public mintPrice = 100000000000;
+    uint256 public totalTickets = 999;
+    uint256 public availableTickets = 999;
     uint256 public ticketPrice = 1;
 
     mapping(address => uint256[]) public ticketHolderIds;
     mapping(uint256 => bool) public checkIns;
 
-    constructor() ERC721("Test 07", "T07") {
+    constructor() ERC721("Nights & Weekends", "NWS001") {
         ticketId.increment();
     }
 
@@ -55,7 +53,12 @@ contract YourContract is Ownable, ERC721URIStorage {
         }
 
         string memory finalSvg = string(
-            abi.encodePacked(checkInFirstSvg, zeros, stringTicketId, checkInLastSvg)
+            abi.encodePacked(
+                checkInFirstSvg,
+                zeros,
+                stringTicketId,
+                checkInLastSvg
+            )
         );
 
         string memory metaData = Base64.encode(
@@ -72,7 +75,7 @@ contract YourContract is Ownable, ERC721URIStorage {
         string memory tokenURI = string(
             abi.encodePacked("data:application/json;base64,", metaData)
         );
-        console.log("tokenURI in checkIn: ", tokenURI);
+
         _setTokenURI(tokenId, tokenURI);
     }
 
@@ -113,8 +116,6 @@ contract YourContract is Ownable, ERC721URIStorage {
 
         _safeMint(msg.sender, ticketId.current());
         _setTokenURI(ticketId.current(), tokenURI);
-
-        // console.log("tokenURI in mint: ", tokenURI);
 
         ticketHolderIds[msg.sender].push(ticketId.current());
         ticketId.increment();
