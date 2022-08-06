@@ -8,8 +8,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Base64.sol";
 
-contract YourContract is Ownable, ERC721URIStorage
- {
+contract YourContract is Ownable, ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private ticketId;
 
@@ -26,19 +25,18 @@ contract YourContract is Ownable, ERC721URIStorage
     uint256 public availableTickets = 500;
     // 11 0s = .0000001 eth
     // uint public mintPrice = 100000000000;
-    uint public ticketPrice = 1;
+    uint256 public ticketPrice = 1;
 
     mapping(address => uint256[]) public ticketHolderIds;
-    mapping(address => bool) public checkIns;
+    mapping(uint256 => bool) public checkIns;
 
     constructor() ERC721("Test 07", "T07") {
         ticketId.increment();
     }
 
-    function checkIn(address addy) public {
-        checkIns[addy] = true;
-        uint256 checkedInTicketId = ticketHolderIds[addy][0];
-
+    function checkIn(uint256 tokenId) public {
+        require(checkIns[tokenId] == false, "Already checked in");
+        checkIns[tokenId] = true;
         string memory metaData = Base64.encode(
             bytes(
                 string(
@@ -51,9 +49,8 @@ contract YourContract is Ownable, ERC721URIStorage
         string memory tokenURI = string(
             abi.encodePacked("data:application/json;base64,", metaData)
         );
-        console.log('tokenURI in checkIn: ', tokenURI);
-
-        _setTokenURI(checkedInTicketId, tokenURI);
+        // console.log("tokenURI in checkIn: ", tokenURI);
+        _setTokenURI(tokenId, tokenURI);
     }
 
     function mint() public payable {
@@ -94,7 +91,7 @@ contract YourContract is Ownable, ERC721URIStorage
         _safeMint(msg.sender, ticketId.current());
         _setTokenURI(ticketId.current(), tokenURI);
 
-        console.log('tokenURI in mint: ', tokenURI);
+        // console.log("tokenURI in mint: ", tokenURI);
 
         ticketHolderIds[msg.sender].push(ticketId.current());
         ticketId.increment();
@@ -125,9 +122,7 @@ contract YourContract is Ownable, ERC721URIStorage
         return saleIsActive;
     }
 
-    function getConfirmOwnership(address addy) public view returns (bool) {
-        // should check if ticketHolderIds[addy] is the owner of the specific ticketId
-        return ticketHolderIds[addy].length > 0;
+    function getUserTickets() public view returns (uint256[] memory) {
+        return ticketHolderIds[msg.sender];
     }
-
 }
